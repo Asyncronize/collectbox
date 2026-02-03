@@ -302,6 +302,18 @@
     </div>
 
     <script>
+        // 检查依赖是否加载
+        if (!window.supabase) {
+            console.error('Supabase SDK 未加载，请检查网络连接');
+            alert('页面加载失败，请刷新重试');
+        }
+
+        if (!window.posthog) {
+            console.warn('PostHog 未加载，分析功能将不可用');
+            // 创建一个空的 posthog 对象避免错误
+            window.posthog = { capture: function() {} };
+        }
+
         // ========== 配置区域（替换为你自己的值）==========
         const SUPABASE_URL = 'https://cqgnuyevkbgjpmxrbusz.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxZ251eWV2a2JnanBteHJidXN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNDE5OTQsImV4cCI6MjA4NTcxNzk5NH0.UzJ0D-mJsl0sNa1LOFKQrv6rpoacmb3TH3xvnvJi0v8';
