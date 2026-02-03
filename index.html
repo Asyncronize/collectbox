@@ -10,9 +10,12 @@
     <script>
         !function (t, e) { var o, n, p, r; e.__SV || (window.posthog = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]), t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.async = !0, p.src = s.api_host + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "posthog", u.people = u.people || [], u.toString = function (t) { var e = "posthog"; return "posthog" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + ".people (stub)" }, o = "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.posthog || []);
 
-        posthog.init('phc_CWquG0xNfBMCXTUIs78L1f1Y511X3uVg8ZyK6nNZjKZ', {
-            api_host: 'https://app.posthog.com'
-        });
+        // 延迟初始化 PostHog，等待页面加载完成
+        if (typeof posthog !== 'undefined') {
+            posthog.init('phc_CWquG0xNfBMCXTUIs78L1f1Y511X3uVg8ZyK6nNZjKZ', {
+                api_host: 'https://app.posthog.com'
+            });
+        }
     </script>
     <style>
         * {
@@ -302,34 +305,47 @@
     </div>
 
     <script>
-        // 检查依赖是否加载
-        if (!window.supabase) {
-            console.error('Supabase SDK 未加载，请检查网络连接');
-            alert('页面加载失败，请刷新重试');
+        // 等待依赖加载完成后初始化应用
+        function initApp() {
+            // 检查依赖是否加载
+            if (!window.supabase) {
+                console.error('Supabase SDK 未加载，请检查网络连接');
+                document.getElementById('bookmarkList').innerHTML =
+                    '<div class="empty-state"><p>页面加载失败</p><p>请检查网络连接后刷新</p></div>';
+                return;
+            }
+
+            if (!window.posthog) {
+                console.warn('PostHog 未加载，分析功能将不可用');
+                // 创建一个空的 posthog 对象避免错误
+                window.posthog = { capture: function() {} };
+            }
+
+            // ========== 配置区域（替换为你自己的值）==========
+            const SUPABASE_URL = 'https://cqgnuyevkbgjpmxrbusz.supabase.co';
+            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxZ251eWV2a2JnanBteHJidXN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNDE5OTQsImV4cCI6MjA4NTcxNzk5NH0.UzJ0D-mJsl0sNa1LOFKQrv6rpoacmb3TH3xvnvJi0v8';
+            // ================================================
+
+            window.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+            // 加载数据
+            loadBookmarks();
         }
-
-        if (!window.posthog) {
-            console.warn('PostHog 未加载，分析功能将不可用');
-            // 创建一个空的 posthog 对象避免错误
-            window.posthog = { capture: function() {} };
-        }
-
-        // ========== 配置区域（替换为你自己的值）==========
-        const SUPABASE_URL = 'https://cqgnuyevkbgjpmxrbusz.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxZ251eWV2a2JnanBteHJidXN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNDE5OTQsImV4cCI6MjA4NTcxNzk5NH0.UzJ0D-mJsl0sNa1LOFKQrv6rpoacmb3TH3xvnvJi0v8';
-        // ================================================
-
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let currentFilter = 'all';
         let allBookmarks = [];
 
-        document.addEventListener('DOMContentLoaded', loadBookmarks);
+        // 页面加载完成后初始化
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
 
         // 加载收藏列表
         async function loadBookmarks() {
             try {
-                let query = supabase
+                let query = window.supabase
                     .from('bookmarks')
                     .select('*')
                     .eq('status', 'active')
@@ -393,7 +409,7 @@
             submitBtn.disabled = true;
 
             try {
-                const { error } = await supabase
+                const { error } = await window.supabase
                     .from('bookmarks')
                     .insert([{ url, title, platform, status: 'active' }]);
 
