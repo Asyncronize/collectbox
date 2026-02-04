@@ -1,513 +1,817 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CollectBox - 社交媒体收藏助手</title>
-    <meta name="description" content="统一管理你在小红书、知乎、B站等平台的收藏内容">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        !function (t, e) { var o, n, p, r; e.__SV || (window.posthog = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]), t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.async = !0, p.src = s.api_host + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "posthog", u.people = u.people || [], u.toString = function (t) { var e = "posthog"; return "posthog" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + ".people (stub)" }, o = "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.posthog || []);
-
-        // 延迟初始化 PostHog，等待页面加载完成
-        if (typeof posthog !== 'undefined') {
-            posthog.init('phc_CWquG0xNfBMCXTUIs78L1f1Y511X3uVg8ZyK6nNZjKZ', {
-                api_host: 'https://app.posthog.com'
-            });
-        }
-    </script>
+    <title>CollectBox AI - 智能收藏助手</title>
     <style>
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
 
         .container {
-            max-width: 600px;
+            max-width: 900px;
             margin: 0 auto;
         }
 
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
         }
 
         .header h1 {
-            color: white;
-            font-size: 24px;
+            font-size: 36px;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
-        .add-btn {
-            background: white;
-            color: #667eea;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .search-box {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 12px;
-            margin-bottom: 15px;
+        .header p {
             font-size: 16px;
-            background: rgba(255, 255, 255, 0.9);
-        }
-
-        .filters {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-            min-height: 44px;
-        }
-
-        .filter-btn.active {
-            background: white;
-            color: #667eea;
+            opacity: 0.95;
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: white;
             border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 15px;
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
-            cursor: pointer;
-            transition: transform 0.2s;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
         }
 
-        .card:hover {
-            transform: translateY(-2px);
+        .input-section {
+            margin-bottom: 20px;
         }
 
-        .card-title {
+        .input-section label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .api-key-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .api-key-section p {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .api-key-section a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .api-key-section a:hover {
+            text-decoration: underline;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 12px;
             font-size: 16px;
             font-weight: 600;
-            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-analyze {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-analyze:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-analyze:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-clear {
+            background: #f1f3f4;
+            color: #666;
+        }
+
+        .btn-clear:hover {
+            background: #e0e0e0;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #e0e0e0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .result {
+            display: none;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .result.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .result-item {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .result-item h4 {
             color: #333;
+            font-size: 14px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .result-item h4::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 14px;
+            background: #667eea;
+            border-radius: 2px;
+        }
+
+        .result-item p {
+            color: #555;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .result-item ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .result-item li {
+            color: #555;
+            line-height: 1.8;
+            font-size: 14px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .result-item li::before {
+            content: '•';
+            color: #667eea;
+            font-weight: bold;
+            position: absolute;
+            left: 5px;
+        }
+
+        .tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 6px 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .content-type {
+            display: inline-block;
+            padding: 6px 14px;
+            background: #e8eaf6;
+            color: #667eea;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .error {
+            display: none;
+            padding: 15px 20px;
+            background: #fee;
+            border-left: 4px solid #f44;
+            border-radius: 8px;
+            margin-top: 15px;
+            color: #c33;
+            font-size: 14px;
+        }
+
+        .error.active {
+            display: block;
+        }
+
+        .history-section {
+            margin-top: 20px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .history-header h3 {
+            color: #333;
+            font-size: 18px;
+        }
+
+        .btn-clear-history {
+            padding: 8px 16px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-clear-history:hover {
+            background: #d32f2f;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .history-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .history-item:hover {
+            background: #e8eaf6;
+            transform: translateX(5px);
+        }
+
+        .history-item-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .history-item-preview {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
 
-        .card-meta {
+        .history-item-tags {
+            margin-top: 8px;
             display: flex;
-            justify-content: space-between;
-            color: #666;
-            font-size: 14px;
+            gap: 6px;
+            flex-wrap: wrap;
         }
 
-        .platform-tag {
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            color: white;
-        }
-
-        .platform-tag.xiaohongshu {
-            background: #ff2442;
-        }
-
-        .platform-tag.zhihu {
-            background: #0066ff;
-        }
-
-        .platform-tag.bilibili {
-            background: #fb7299;
-        }
-
-        .platform-tag.other {
-            background: #666;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 400px;
-        }
-
-        .modal-content h2 {
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            font-size: 16px;
-        }
-
-        .submit-btn {
-            width: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 12px;
-            font-size: 16px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .cancel-btn {
-            width: 100%;
-            margin-top: 10px;
-            padding: 15px;
-            background: #f5f5f5;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 16px;
+        .history-item-tags .tag {
+            font-size: 11px;
+            padding: 4px 10px;
         }
 
         .empty-state {
             text-align: center;
-            color: white;
-            padding: 50px 20px;
+            padding: 40px 20px;
+            color: #999;
         }
 
-        .empty-state p {
-            margin: 10px 0;
-            opacity: 0.9;
-        }
-
-        .loading {
-            text-align: center;
-            color: white;
-            padding: 20px;
-        }
-
-        /* 移动端弹窗全屏 */
-        @media (max-width: 480px) {
-            .modal-content {
-                width: 100%;
-                height: 100%;
-                max-width: none;
-                border-radius: 0;
-                display: flex;
-                flex-direction: column;
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
             }
 
-            .submit-btn {
-                margin-top: auto;
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
             }
         }
     </style>
 </head>
-
 <body>
     <div class="container">
         <div class="header">
-            <h1>CollectBox</h1>
-            <button class="add-btn" onclick="openModal()">+ 添加</button>
+            <h1>🤖 CollectBox AI</h1>
+            <p>智能收藏助手 - 让每一次收藏都有价值</p>
         </div>
 
-        <input type="text" class="search-box" placeholder="搜索收藏..." id="searchInput" oninput="handleSearch()">
+        <div class="card">
+            <div class="input-section">
+                <label>粘贴要分析的内容</label>
+                <textarea id="contentInput" placeholder="粘贴文章、笔记、或任何文字内容...&#10;&#10;AI 将自动生成：&#10;- 📝 内容摘要&#10;- 🔑 关键要点&#10;- 🏷️ 智能标签&#10;- 📊 内容类型"></textarea>
+            </div>
 
-        <div class="filters">
-            <button class="filter-btn active" data-platform="all" onclick="filterByPlatform('all', this)">全部</button>
-            <button class="filter-btn" data-platform="xiaohongshu"
-                onclick="filterByPlatform('xiaohongshu', this)">小红书</button>
-            <button class="filter-btn" data-platform="zhihu" onclick="filterByPlatform('zhihu', this)">知乎</button>
-            <button class="filter-btn" data-platform="bilibili" onclick="filterByPlatform('bilibili', this)">B站</button>
+            <div class="api-key-section">
+                <p>💡 <strong>首次使用需要配置阿里云百炼 API Key</strong></p>
+                <p>1. 访问 <a href="https://bailian.console.aliyun.com" target="_blank">阿里云百炼控制台</a> 获取 API Key</p>
+                <p>2. 在"应用中心"创建应用，获取 App ID</p>
+                <p>3. 在下方输入框填入你的 API Key 和 App ID（仅保存在本地浏览器）</p>
+                <input type="text" id="apiKeyInput" placeholder="粘贴你的百炼 API Key（例如：sk-xxx）" style="margin-bottom: 10px;">
+                <input type="text" id="appIdInput" placeholder="粘贴你的应用 App ID">
+            </div>
+
+            <div class="button-group">
+                <button class="btn-analyze" id="analyzeBtn" onclick="analyzeContent()">
+                    🚀 AI 智能分析
+                </button>
+                <button class="btn-clear" onclick="clearForm()">
+                    🗑️ 清空
+                </button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <span>AI 正在分析中，请稍候...</span>
+            </div>
+
+            <div class="error" id="error"></div>
+
+            <div class="result" id="result">
+                <h3>✨ AI 分析结果</h3>
+                <div class="result-item">
+                    <h4>内容摘要</h4>
+                    <p id="resultSummary"></p>
+                </div>
+                <div class="result-item">
+                    <h4>关键要点</h4>
+                    <ul id="resultKeyPoints"></ul>
+                </div>
+                <div class="result-item">
+                    <h4>智能标签</h4>
+                    <div class="tags" id="resultTags"></div>
+                </div>
+                <div class="result-item">
+                    <h4>内容类型</h4>
+                    <div>
+                        <span class="content-type" id="resultType"></span>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div id="bookmarkList">
-            <div class="loading">加载中...</div>
-        </div>
-    </div>
-
-    <div class="modal" id="addModal">
-        <div class="modal-content">
-            <h2>添加收藏</h2>
-            <div class="form-group">
-                <label>链接 *</label>
-                <input type="url" id="urlInput" placeholder="粘贴链接地址...">
+        <div class="card history-section">
+            <div class="history-header">
+                <h3>📚 历史收藏</h3>
+                <button class="btn-clear-history" onclick="clearHistory()">清空历史</button>
             </div>
-            <div class="form-group">
-                <label>标题 *</label>
-                <input type="text" id="titleInput" placeholder="输入内容标题...">
-            </div>
-            <div class="form-group">
-                <label>来源平台</label>
-                <select id="platformSelect">
-                    <option value="xiaohongshu">小红书</option>
-                    <option value="zhihu">知乎</option>
-                    <option value="bilibili">B站</option>
-                    <option value="other">其他</option>
-                </select>
-            </div>
-            <button class="submit-btn" onclick="saveBookmark()">保存收藏</button>
-            <button class="cancel-btn" onclick="closeModal()">取消</button>
+            <div id="historyList" class="history-list"></div>
         </div>
     </div>
 
     <script>
-        // 等待依赖加载完成后初始化应用
-        function initApp() {
-            // 检查依赖是否加载
-            if (!window.supabase) {
-                console.error('Supabase SDK 未加载，请检查网络连接');
-                document.getElementById('bookmarkList').innerHTML =
-                    '<div class="empty-state"><p>页面加载失败</p><p>请检查网络连接后刷新</p></div>';
+        // ==================== System Prompt ====================
+        const SYSTEM_PROMPT = `你是"小收"，一位专业的内容分析助手。你的职责是帮助用户快速理解和整理他们想要收藏的内容。
+
+你的特点：
+1. 善于提炼要点：能从长文中快速提取核心信息
+2. 分类准确：能够识别内容类型（教程、观点、资讯、娱乐等）
+3. 标签精准：根据内容主题推荐2-3个合适的标签
+4. 语气友好：像一位靠谱的助理，简洁但不冷漠
+
+## 你的任务
+
+分析用户提供的内容，返回以下信息：
+
+1. **摘要**（50字以内）：用一句话概括内容的核心观点或主题
+2. **要点**（3-5条）：列出内容中最重要的信息点
+3. **标签**（2-3个）：推荐适合的分类标签
+4. **内容类型**：判断属于以下哪种类型
+   - 教程/攻略
+   - 观点/评论
+   - 资讯/新闻
+   - 生活/娱乐
+   - 知识/科普
+   - 其他
+
+## 输出格式
+
+请严格按照以下JSON格式输出：
+
+{
+  "summary": "一句话摘要",
+  "keyPoints": ["要点1", "要点2", "要点3"],
+  "tags": ["标签1", "标签2"],
+  "contentType": "内容类型"
+}
+
+## 注意事项
+
+1. 摘要要简洁有力，突出内容价值
+2. 要点要具体，避免空泛的描述
+3. 标签要具体，如"Python教程"而不是"编程"
+4. 如果内容不完整或无法分析，请诚实说明
+5. 只返回JSON，不要有任何其他文字`;
+
+        // ==================== 核心功能 ====================
+
+        // 页面加载时初始化
+        window.onload = function() {
+            loadApiKey();
+            loadHistory();
+        };
+
+        // 加载保存的 API Key 和 App ID
+        function loadApiKey() {
+            const apiKey = localStorage.getItem('bailian_api_key');
+            const appId = localStorage.getItem('bailian_app_id');
+            if (apiKey) {
+                document.getElementById('apiKeyInput').value = apiKey;
+            }
+            if (appId) {
+                document.getElementById('appIdInput').value = appId;
+            }
+        }
+
+        // 保存 API Key 和 App ID
+        function saveApiKey() {
+            const apiKey = document.getElementById('apiKeyInput').value.trim();
+            const appId = document.getElementById('appIdInput').value.trim();
+            if (apiKey) {
+                localStorage.setItem('bailian_api_key', apiKey);
+            }
+            if (appId) {
+                localStorage.setItem('bailian_app_id', appId);
+            }
+        }
+
+        // 清空表单
+        function clearForm() {
+            document.getElementById('contentInput').value = '';
+            document.getElementById('result').classList.remove('active');
+            document.getElementById('error').classList.remove('active');
+        }
+
+        // AI 分析内容
+        async function analyzeContent() {
+            const content = document.getElementById('contentInput').value.trim();
+            const apiKeyInput = document.getElementById('apiKeyInput');
+            const appIdInput = document.getElementById('appIdInput');
+            const apiKey = apiKeyInput.value.trim();
+            const appId = appIdInput.value.trim();
+
+            // 清除之前的错误和结果
+            document.getElementById('error').classList.remove('active');
+            document.getElementById('result').classList.remove('active');
+
+            // 验证输入
+            if (!content) {
+                showError('请输入要分析的内容');
                 return;
             }
 
-            if (!window.posthog) {
-                console.warn('PostHog 未加载，分析功能将不可用');
-                // 创建一个空的 posthog 对象避免错误
-                window.posthog = { capture: function() {} };
-            }
-
-            // ========== 配置区域（替换为你自己的值）==========
-            const SUPABASE_URL = 'https://cqgnuyevkbgjpmxrbusz.supabase.co';
-            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxZ251eWV2a2JnanBteHJidXN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNDE5OTQsImV4cCI6MjA4NTcxNzk5NH0.UzJ0D-mJsl0sNa1LOFKQrv6rpoacmb3TH3xvnvJi0v8';
-            // ================================================
-
-            window.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-            // 加载数据
-            loadBookmarks();
-        }
-
-        let currentFilter = 'all';
-        let allBookmarks = [];
-
-        // 页面加载完成后初始化
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initApp);
-        } else {
-            initApp();
-        }
-
-        // 加载收藏列表
-        async function loadBookmarks() {
-            try {
-                let query = window.supabase
-                    .from('bookmarks')
-                    .select('*')
-                    .eq('status', 'active')
-                    .order('created_at', { ascending: false });
-
-                if (currentFilter !== 'all') {
-                    query = query.eq('platform', currentFilter);
-                }
-
-                const { data, error } = await query;
-                if (error) throw error;
-
-                allBookmarks = data || [];
-                renderBookmarks(allBookmarks);
-            } catch (error) {
-                console.error('加载失败:', error);
-                document.getElementById('bookmarkList').innerHTML =
-                    '<div class="empty-state"><p>加载失败，请刷新重试</p></div>';
-            }
-        }
-
-        // 渲染列表
-        function renderBookmarks(data) {
-            const list = document.getElementById('bookmarkList');
-            if (!data || data.length === 0) {
-                list.innerHTML = '<div class="empty-state"><p>还没有收藏内容</p><p>点击右上角 + 添加 开始收藏</p></div>';
+            if (!apiKey) {
+                showError('请先配置百炼 API Key');
+                apiKeyInput.focus();
                 return;
             }
-            list.innerHTML = data.map(item => `
-                <div class="card" onclick="window.open('${escapeHtml(item.url)}', '_blank')">
-                    <div class="card-title">${escapeHtml(item.title)}</div>
-                    <div class="card-meta">
-                        <span class="platform-tag ${item.platform}">${getPlatformName(item.platform)}</span>
-                        <span>${formatDate(item.created_at)}</span>
-                    </div>
-                </div>
-            `).join('');
-        }
 
-        // 保存收藏
-        async function saveBookmark() {
-            const url = document.getElementById('urlInput').value.trim();
-            const title = document.getElementById('titleInput').value.trim();
-            const platform = document.getElementById('platformSelect').value;
-
-            if (!url) { alert('请输入链接'); return; }
-            if (!title) { alert('请输入标题'); return; }
-
-            // 验证 URL 格式
-            try {
-                new URL(url);
-            } catch {
-                alert('请输入有效的链接地址');
+            if (!appId) {
+                showError('请先配置应用 App ID');
+                appIdInput.focus();
                 return;
             }
+
+            // 保存 API Key 和 App ID
+            saveApiKey();
 
             // 显示加载状态
-            const submitBtn = document.querySelector('.submit-btn');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = '保存中...';
-            submitBtn.disabled = true;
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const loading = document.getElementById('loading');
+            analyzeBtn.disabled = true;
+            loading.classList.add('active');
 
             try {
-                const { error } = await window.supabase
-                    .from('bookmarks')
-                    .insert([{ url, title, platform, status: 'active' }]);
+                // 调用百炼 API
+                const result = await callBailianAPI(apiKey, appId, content);
 
-                if (error) throw error;
+                // 显示结果
+                displayResult(result);
 
-                posthog.capture('bookmark_saved', {
-                    platform: platform,
-                    title_length: title.length
-                });
+                // 保存到历史
+                saveToHistory(content, result);
 
-                closeModal();
-                resetForm();
-                loadBookmarks();
             } catch (error) {
-                console.error('保存失败:', error);
-                alert('保存失败: ' + error.message);
-                posthog.capture('bookmark_failed', {
-                    error_message: error.message
-                });
+                console.error('分析失败:', error);
+                showError(error.message || '分析失败，请检查网络连接和 API Key');
             } finally {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
+                // 恢复按钮状态
+                analyzeBtn.disabled = false;
+                loading.classList.remove('active');
             }
         }
 
-        // 搜索
-        function handleSearch() {
-            const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
-            if (keyword.length > 0) {
-                posthog.capture('search_performed', {
-                    keyword_length: keyword.length
+        // 调用阿里云百炼 API
+        async function callBailianAPI(apiKey, appId, content) {
+            const API_URL = `https://dashscope.aliyuncs.com/api/v1/apps/${appId}/completion`;
+
+            const requestBody = {
+                input: {
+                    prompt: `${SYSTEM_PROMPT}\n\n用户内容：\n${content}`
+                },
+                parameters: {},
+                debug: {}
+            };
+
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json',
+                    'X-DashScope-SSE': 'disable'
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                let errorMessage = `API 请求失败 (${response.status})`;
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.message || errorData.error || errorMessage;
+                } catch (e) {
+                    // 忽略解析错误
+                }
+                throw new Error(errorMessage);
+            }
+
+            const data = await response.json();
+
+            // 解析响应
+            const text = data.output?.text || data.output?.finish_reason || '';
+
+            if (!text) {
+                throw new Error('API 返回内容为空');
+            }
+
+            // 提取 JSON
+            let jsonText = text.trim();
+            if (jsonText.includes('```json')) {
+                jsonText = jsonText.split('```json')[1].split('```')[0].trim();
+            } else if (jsonText.includes('```')) {
+                jsonText = jsonText.split('```')[1].split('```')[0].trim();
+            }
+
+            try {
+                return JSON.parse(jsonText);
+            } catch (e) {
+                // 如果解析失败，尝试返回默认结构
+                console.warn('JSON 解析失败，使用默认结构', e);
+                return {
+                    summary: jsonText.substring(0, 100),
+                    keyPoints: ['无法自动提取要点，请查看原文'],
+                    tags: ['待分类'],
+                    contentType: '其他'
+                };
+            }
+        }
+
+        // 显示分析结果
+        function displayResult(result) {
+            // 摘要
+            document.getElementById('resultSummary').textContent = result.summary || '暂无摘要';
+
+            // 关键要点
+            const keyPointsList = document.getElementById('resultKeyPoints');
+            keyPointsList.innerHTML = '';
+            if (result.keyPoints && result.keyPoints.length > 0) {
+                result.keyPoints.forEach(point => {
+                    const li = document.createElement('li');
+                    li.textContent = point;
+                    keyPointsList.appendChild(li);
                 });
+            } else {
+                const li = document.createElement('li');
+                li.textContent = '暂无要点';
+                keyPointsList.appendChild(li);
             }
-            if (!keyword) { renderBookmarks(allBookmarks); return; }
-            const filtered = allBookmarks.filter(item =>
-                item.title.toLowerCase().includes(keyword)
-            );
-            renderBookmarks(filtered);
+
+            // 标签
+            const tagsContainer = document.getElementById('resultTags');
+            tagsContainer.innerHTML = '';
+            if (result.tags && result.tags.length > 0) {
+                result.tags.forEach(tag => {
+                    const span = document.createElement('span');
+                    span.className = 'tag';
+                    span.textContent = tag;
+                    tagsContainer.appendChild(span);
+                });
+            } else {
+                const span = document.createElement('span');
+                span.className = 'tag';
+                span.textContent = '无标签';
+                tagsContainer.appendChild(span);
+            }
+
+            // 内容类型
+            document.getElementById('resultType').textContent = result.contentType || '未分类';
+
+            // 显示结果区域
+            document.getElementById('result').classList.add('active');
         }
 
-        // 筛选
-        function filterByPlatform(platform, btn) {
-            posthog.capture('filter_by_platform', { platform: platform });
-            currentFilter = platform;
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            // 清空搜索框
-            document.getElementById('searchInput').value = '';
-            loadBookmarks();
+        // 显示错误
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = '❌ ' + message;
+            errorDiv.classList.add('active');
         }
 
-        // 弹窗控制
-        // 点击添加按钮
-        function openModal() {
-            posthog.capture('click_add_button');
-            document.getElementById('addModal').classList.add('show');
+        // ==================== 历史记录功能 ====================
+
+        // 保存到历史
+        function saveToHistory(content, analysis) {
+            let history = JSON.parse(localStorage.getItem('collectbox_history') || '[]');
+
+            const item = {
+                id: Date.now(),
+                content: content.substring(0, 200), // 只保存前200字
+                analysis: analysis,
+                timestamp: new Date().toISOString()
+            };
+
+            history.unshift(item); // 添加到开头
+
+            // 只保留最近20条
+            if (history.length > 20) {
+                history = history.slice(0, 20);
+            }
+
+            localStorage.setItem('collectbox_history', JSON.stringify(history));
+            loadHistory();
         }
 
-        function closeModal() {
-            document.getElementById('addModal').classList.remove('show');
-            resetForm();
+        // 加载历史记录
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('collectbox_history') || '[]');
+            const historyList = document.getElementById('historyList');
+
+            if (history.length === 0) {
+                historyList.innerHTML = '<div class="empty-state">暂无历史记录</div>';
+                return;
+            }
+
+            historyList.innerHTML = '';
+            history.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.onclick = () => viewHistory(item);
+
+                const title = document.createElement('div');
+                title.className = 'history-item-title';
+                title.textContent = item.analysis.summary || '无标题';
+
+                const preview = document.createElement('div');
+                preview.className = 'history-item-preview';
+                preview.textContent = item.content;
+
+                const tags = document.createElement('div');
+                tags.className = 'history-item-tags';
+                if (item.analysis.tags) {
+                    item.analysis.tags.forEach(tag => {
+                        const span = document.createElement('span');
+                        span.className = 'tag';
+                        span.textContent = tag;
+                        tags.appendChild(span);
+                    });
+                }
+
+                div.appendChild(title);
+                div.appendChild(preview);
+                div.appendChild(tags);
+                historyList.appendChild(div);
+            });
         }
 
-        // 重置表单
-        function resetForm() {
-            document.getElementById('urlInput').value = '';
-            document.getElementById('titleInput').value = '';
-            document.getElementById('platformSelect').value = 'xiaohongshu';
+        // 查看历史记录
+        function viewHistory(item) {
+            document.getElementById('contentInput').value = item.content;
+            displayResult(item.analysis);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // 工具函数
-        function getPlatformName(platform) {
-            const names = { 'xiaohongshu': '小红书', 'zhihu': '知乎', 'bilibili': 'B站', 'other': '其他' };
-            return names[platform] || platform;
+        // 清空历史
+        function clearHistory() {
+            if (confirm('确定要清空所有历史记录吗？')) {
+                localStorage.removeItem('collectbox_history');
+                loadHistory();
+            }
         }
-
-        function formatDate(dateStr) {
-            const date = new Date(dateStr);
-            const now = new Date();
-            const diff = now - date;
-            if (diff < 60000) return '刚刚';
-            if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前';
-            if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前';
-            if (diff < 604800000) return Math.floor(diff / 86400000) + '天前';
-            return `${date.getMonth() + 1}/${date.getDate()}`;
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // 点击弹窗外部关闭
-        document.getElementById('addModal').addEventListener('click', function (e) {
-            if (e.target === this) closeModal();
-        });
     </script>
 </body>
-
 </html>
