@@ -1,0 +1,14 @@
+{
+  "name": "collectbox",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "统一管理你在小红书、知乎、B站等平台的收藏内容",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}
