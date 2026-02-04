@@ -79,8 +79,19 @@ npm run build
 
 1. 推送代码到 GitHub
 2. 在 [Vercel](https://vercel.com) 导入项目
-3. 配置环境变量（在 Settings > Environment Variables）
+3. **重要：配置环境变量**（在 Settings > Environment Variables）
+   ```
+   VITE_SUPABASE_URL=your_supabase_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   VITE_BAILIAN_API_KEY=your_bailian_api_key
+   VITE_POSTHOG_KEY=your_posthog_key (可选)
+   VITE_POSTHOG_HOST=https://app.posthog.com (可选)
+   ```
 4. 部署
+
+**注意**：
+- `VITE_BAILIAN_API_KEY` 配置在 Vercel 环境变量后，用户无需在前端输入 API Key
+- 如果不配置环境变量，用户可以在前端手动输入 API Key（不推荐用于生产环境）
 
 ### 方式二：通过 Vercel CLI
 
@@ -94,6 +105,7 @@ vercel
 # 配置环境变量
 vercel env add VITE_SUPABASE_URL
 vercel env add VITE_SUPABASE_ANON_KEY
+vercel env add VITE_BAILIAN_API_KEY
 ```
 
 ## 环境变量说明
