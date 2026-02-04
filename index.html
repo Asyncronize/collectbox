@@ -318,17 +318,26 @@
 
         .btn-clear-history {
             padding: 8px 16px;
-            background: #f44336;
-            color: white;
-            border: none;
+            background: transparent;
+            color: #ef4444;
+            border: 2px solid #fee2e2;
             border-radius: 8px;
             font-size: 13px;
             cursor: pointer;
             font-weight: 600;
+            transition: all 0.3s ease;
         }
 
         .btn-clear-history:hover {
-            background: #d32f2f;
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #dc2626;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-clear-history:active {
+            transform: translateY(0);
         }
 
         .history-list {
@@ -469,7 +478,7 @@
         <div class="card history-section">
             <div class="history-header">
                 <h3>📚 历史收藏</h3>
-                <button class="btn-clear-history" onclick="clearHistory()">清空历史</button>
+                <button class="btn-clear-history" onclick="clearHistory()">🗑️ 清空历史</button>
             </div>
             <div id="historyList" class="history-list"></div>
         </div>
