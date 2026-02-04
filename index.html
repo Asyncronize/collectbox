@@ -430,10 +430,9 @@
             <div class="api-key-section">
                 <p>💡 <strong>首次使用需要配置阿里云百炼 API Key</strong></p>
                 <p>1. 访问 <a href="https://bailian.console.aliyun.com" target="_blank">阿里云百炼控制台</a> 获取 API Key</p>
-                <p>2. 在"应用中心"创建应用，获取 App ID</p>
-                <p>3. 在下方输入框填入你的 API Key 和 App ID（仅保存在本地浏览器）</p>
-                <input type="text" id="apiKeyInput" placeholder="粘贴你的百炼 API Key（例如：sk-xxx）" style="margin-bottom: 10px;">
-                <input type="text" id="appIdInput" placeholder="粘贴你的应用 App ID">
+                <p>2. 在"API-KEY 管理"中创建 API Key</p>
+                <p>3. 在下方输入框填入你的 API Key（仅保存在本地浏览器）</p>
+                <input type="text" id="apiKeyInput" placeholder="粘贴你的百炼 API Key（例如：sk-xxx）">
             </div>
 
             <div class="button-group">
@@ -536,27 +535,19 @@
             loadHistory();
         };
 
-        // 加载保存的 API Key 和 App ID
+        // 加载保存的 API Key
         function loadApiKey() {
             const apiKey = localStorage.getItem('bailian_api_key');
-            const appId = localStorage.getItem('bailian_app_id');
             if (apiKey) {
                 document.getElementById('apiKeyInput').value = apiKey;
             }
-            if (appId) {
-                document.getElementById('appIdInput').value = appId;
-            }
         }
 
-        // 保存 API Key 和 App ID
+        // 保存 API Key
         function saveApiKey() {
             const apiKey = document.getElementById('apiKeyInput').value.trim();
-            const appId = document.getElementById('appIdInput').value.trim();
             if (apiKey) {
                 localStorage.setItem('bailian_api_key', apiKey);
-            }
-            if (appId) {
-                localStorage.setItem('bailian_app_id', appId);
             }
         }
 
@@ -571,9 +562,7 @@
         async function analyzeContent() {
             const content = document.getElementById('contentInput').value.trim();
             const apiKeyInput = document.getElementById('apiKeyInput');
-            const appIdInput = document.getElementById('appIdInput');
             const apiKey = apiKeyInput.value.trim();
-            const appId = appIdInput.value.trim();
 
             // 清除之前的错误和结果
             document.getElementById('error').classList.remove('active');
@@ -591,13 +580,7 @@
                 return;
             }
 
-            if (!appId) {
-                showError('请先配置应用 App ID');
-                appIdInput.focus();
-                return;
-            }
-
-            // 保存 API Key 和 App ID
+            // 保存 API Key
             saveApiKey();
 
             // 显示加载状态
@@ -608,7 +591,7 @@
 
             try {
                 // 调用百炼 API
-                const result = await callBailianAPI(apiKey, appId, content);
+                const result = await callBailianAPI(apiKey, content);
 
                 // 显示结果
                 displayResult(result);
@@ -626,24 +609,34 @@
             }
         }
 
-        // 调用阿里云百炼 API
-        async function callBailianAPI(apiKey, appId, content) {
-            const API_URL = `https://dashscope.aliyuncs.com/api/v1/apps/${appId}/completion`;
+        // 调用阿里云百炼 API（通义千问模型）
+        async function callBailianAPI(apiKey, content) {
+            const API_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation';
 
             const requestBody = {
+                model: "qwen-plus",
                 input: {
-                    prompt: `${SYSTEM_PROMPT}\n\n用户内容：\n${content}`
+                    messages: [
+                        {
+                            role: "system",
+                            content: SYSTEM_PROMPT
+                        },
+                        {
+                            role: "user",
+                            content: `用户内容：\n${content}`
+                        }
+                    ]
                 },
-                parameters: {},
-                debug: {}
+                parameters: {
+                    result_format: "message"
+                }
             };
 
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${apiKey}`,
-                    'Content-Type': 'application/json',
-                    'X-DashScope-SSE': 'disable'
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(requestBody)
             });
@@ -662,7 +655,7 @@
             const data = await response.json();
 
             // 解析响应
-            const text = data.output?.text || data.output?.finish_reason || '';
+            const text = data.output?.choices?.[0]?.message?.content || data.output?.text || '';
 
             if (!text) {
                 throw new Error('API 返回内容为空');
