@@ -77,30 +77,6 @@
             border-color: #667eea;
         }
 
-        .api-key-section {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
-        }
-
-        .api-key-section p {
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 8px;
-        }
-
-        .api-key-section a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .api-key-section a:hover {
-            text-decoration: underline;
-        }
-
         input[type="text"] {
             width: 100%;
             padding: 12px 15px;
@@ -427,14 +403,6 @@
                 <textarea id="contentInput" placeholder="粘贴文章、笔记、或任何文字内容...&#10;&#10;AI 将自动生成：&#10;- 📝 内容摘要&#10;- 🔑 关键要点&#10;- 🏷️ 智能标签&#10;- 📊 内容类型"></textarea>
             </div>
 
-            <div class="api-key-section">
-                <p>💡 <strong>首次使用需要配置阿里云百炼 API Key</strong></p>
-                <p>1. 访问 <a href="https://bailian.console.aliyun.com" target="_blank">阿里云百炼控制台</a> 获取 API Key</p>
-                <p>2. 在"API-KEY 管理"中创建 API Key</p>
-                <p>3. 在下方输入框填入你的 API Key（仅保存在本地浏览器）</p>
-                <input type="text" id="apiKeyInput" placeholder="粘贴你的百炼 API Key（例如：sk-xxx）">
-            </div>
-
             <div class="button-group">
                 <button class="btn-analyze" id="analyzeBtn" onclick="analyzeContent()">
                     🚀 AI 智能分析
@@ -531,25 +499,8 @@
 
         // 页面加载时初始化
         window.onload = function() {
-            loadApiKey();
             loadHistory();
         };
-
-        // 加载保存的 API Key
-        function loadApiKey() {
-            const apiKey = localStorage.getItem('bailian_api_key');
-            if (apiKey) {
-                document.getElementById('apiKeyInput').value = apiKey;
-            }
-        }
-
-        // 保存 API Key
-        function saveApiKey() {
-            const apiKey = document.getElementById('apiKeyInput').value.trim();
-            if (apiKey) {
-                localStorage.setItem('bailian_api_key', apiKey);
-            }
-        }
 
         // 清空表单
         function clearForm() {
@@ -561,8 +512,6 @@
         // AI 分析内容
         async function analyzeContent() {
             const content = document.getElementById('contentInput').value.trim();
-            const apiKeyInput = document.getElementById('apiKeyInput');
-            const apiKey = apiKeyInput.value.trim();
 
             // 清除之前的错误和结果
             document.getElementById('error').classList.remove('active');
@@ -574,15 +523,6 @@
                 return;
             }
 
-            if (!apiKey) {
-                showError('请先配置百炼 API Key');
-                apiKeyInput.focus();
-                return;
-            }
-
-            // 保存 API Key
-            saveApiKey();
-
             // 显示加载状态
             const analyzeBtn = document.getElementById('analyzeBtn');
             const loading = document.getElementById('loading');
@@ -591,7 +531,7 @@
 
             try {
                 // 调用百炼 API
-                const result = await callBailianAPI(apiKey, content);
+                const result = await callBailianAPI(content);
 
                 // 显示结果
                 displayResult(result);
@@ -610,12 +550,11 @@
         }
 
         // 调用阿里云百炼 API（通过后端代理）
-        async function callBailianAPI(apiKey, content) {
+        async function callBailianAPI(content) {
             // 使用 Vercel Serverless Function 作为代理
             const API_URL = '/api/analyze';
 
             const requestBody = {
-                apiKey: apiKey,
                 content: content,
                 systemPrompt: SYSTEM_PROMPT
             };

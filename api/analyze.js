@@ -4,11 +4,13 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // 从环境变量获取 API Key
-  const apiKey = process.env.VITE_BAILIAN_API_KEY || req.body.apiKey;
+  // 优先从环境变量获取 API Key
+  const apiKey = process.env.VITE_BAILIAN_API_KEY;
 
   if (!apiKey) {
-    return res.status(400).json({ error: 'API Key is required' });
+    return res.status(500).json({
+      error: 'API Key not configured. Please set VITE_BAILIAN_API_KEY in Vercel environment variables.'
+    });
   }
 
   const { content, systemPrompt } = req.body;
